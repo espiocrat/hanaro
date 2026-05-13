@@ -1,7 +1,1180 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <meta charset="UTF-8"><!DOCTYPE html>
+<html lang="ko">
+<head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, minimum-scale=1, maximum-scale=5, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1B4332">
+  <meta name="description" content="하나로마트 — 데이터 기반 소비자 소통 앱">
+  <title>하나로마트 — 데이터 기반 소비자 소통 앱</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script>
+    // Safari 높이 조정
+    (function(){
+      function adjustHeightForSafari(){
+        var app = document.querySelector('.app');
+        if(!app) return;
+        if(typeof window.visualViewport !== 'undefined'){
+          app.style.height = window.visualViewport.height + 'px';
+        }
+      }
+      adjustHeightForSafari();
+      window.addEventListener('resize', adjustHeightForSafari);
+      window.addEventListener('orientationchange', function(){
+        setTimeout(adjustHeightForSafari, 100);
+      });
+      var scrollTimeout;
+      window.addEventListener('scroll', function(){
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(adjustHeightForSafari, 100);
+      });
+    })();
+  </script>
+  <script>
+    // 기기 감지
+    (function(){
+      var MODES = ['mode-mobile','mode-tablet','mode-pc'];
+      var _resizeTimer = null;
+      function detect(){
+        var w = window.innerWidth || document.documentElement.clientWidth;
+        var cls;
+        if(w <= 600) cls = 'mode-mobile';
+        else if(w <= 1024) cls = 'mode-tablet';
+        else cls = 'mode-pc';
+        var root = document.documentElement;
+        for(var i=0;i<MODES.length;i++) root.classList.remove(MODES[i]);
+        root.classList.add(cls);
+      }
+      detect();
+      window.addEventListener('resize', function(){
+        if(_resizeTimer) clearTimeout(_resizeTimer);
+        _resizeTimer = setTimeout(detect, 150);
+      });
+    })();
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    button, a, [role="button"] {
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    
+    input, textarea {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+    
+    :focus-visible {
+      outline: 2px solid var(--g3);
+      outline-offset: 2px;
+    }
+    
+    :root {
+      --g0: #0a1f12;
+      --g1: #1B4332;
+      --g2: #2D6A4F;
+      --g3: #40916C;
+      --g4: #74C69D;
+      --g5: #B7E4C7;
+      --g6: #D8F3DC;
+      --orange: #E76F1B;
+      --orange-l: #fff3e0;
+      --blue: #1D4ED8;
+      --blue-l: #EFF6FF;
+      --white: #fff;
+      --off: #F8FAF9;
+      --gray: #6B7280;
+      --lgray: #E5E7EB;
+      --dark: #1E2D24;
+      --r: 14px;
+      --rs: 10px;
+      --rx: 6px;
+      --font: 'Noto Sans KR', sans-serif;
+      --shadow: 0 2px 12px rgba(0,0,0,.08);
+      --shadow-lg: 0 4px 24px rgba(0,0,0,.13);
+    }
+    
+    html, body {
+      font-family: var(--font);
+      background: var(--off);
+      color: var(--dark);
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      -webkit-text-size-adjust: 100%;
+      -webkit-font-smoothing: antialiased;
+      position: fixed;
+    }
+    
+    /* 모바일: 상단 헤더 + 좌측 사이드바 + 메인 + 하단 네비 */
+    .app {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+      height: 100dvh;
+      width: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+    
+    .app-sidebar {
+      width: 70px;
+      background: var(--g1);
+      border-right: 1px solid var(--lgray);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: max(0px, env(safe-area-inset-top));
+      padding-bottom: max(0px, env(safe-area-inset-bottom));
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      z-index: 99;
+    }
+    
+    .sidebar-logo {
+      font-size: 28px;
+      padding: 12px 0;
+      margin-bottom: 8px;
+    }
+    
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      align-items: center;
+    }
+    
+    .sidebar-nav-btn {
+      width: 50px;
+      height: 50px;
+      border: none;
+      background: none;
+      color: rgba(255,255,255,0.7);
+      font-size: 22px;
+      cursor: pointer;
+      border-radius: var(--rs);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    
+    .sidebar-nav-btn:hover {
+      background: rgba(255,255,255,0.1);
+      color: var(--white);
+    }
+    
+    .sidebar-nav-btn.active {
+      background: var(--g3);
+      color: var(--white);
+    }
+    
+    .sidebar-user {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--g4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--white);
+      margin-top: auto;
+      cursor: pointer;
+    }
+    
+    .app-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      min-width: 0;
+    }
+    
+    .app-header {
+      background: var(--white);
+      border-bottom: 1px solid var(--lgray);
+      padding: max(10px, env(safe-area-inset-top)) 12px 10px max(0px, env(safe-area-inset-left));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 50;
+    }
+    
+    .app-header-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--dark);
+    }
+    
+    .app-header-icons {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .app-header-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+    
+    .pages-wrap {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      width: 100%;
+    }
+    
+    .page {
+      display: none;
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding: 12px;
+      padding-left: max(12px, env(safe-area-inset-left));
+      padding-right: max(12px, env(safe-area-inset-right));
+      padding-top: max(12px, env(safe-area-inset-top));
+      width: 100%;
+      height: 100%;
+    }
+    
+    .page.active {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* ===== 공통 스타일 ===== */
+    .sh {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 18px 0 11px;
+      width: 100%;
+    }
+    
+    .sh-t {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .sh-t::before {
+      content: '';
+      width: 3px;
+      height: 14px;
+      background: var(--g3);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    
+    .sh-a {
+      font-size: 12px;
+      color: var(--g3);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    
+    /* KPI 그리드 */
+    .kpi-grid {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 18px;
+      width: 100%;
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .kpi {
+      background: var(--white);
+      border-radius: var(--rs);
+      padding: 12px 10px;
+      border: 1px solid var(--lgray);
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    
+    .kpi::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--ac, var(--g3));
+    }
+    
+    .kpi-val {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--g1);
+      line-height: 1.2;
+    }
+    
+    .kpi-lbl {
+      font-size: 10px;
+      color: var(--gray);
+      margin-top: 4px;
+    }
+    
+    .kpi-delta {
+      font-size: 9px;
+      color: var(--g3);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    
+    /* 상품 그리드 */
+    .prod-grid {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 18px;
+      width: 100%;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    }
+    
+    .prod-card {
+      background: var(--white);
+      border-radius: var(--rs);
+      border: 1px solid var(--lgray);
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      min-height: 180px;
+      transition: all 0.2s;
+    }
+    
+    .prod-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+    
+    .prod-img {
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      background: var(--g6);
+      position: relative;
+      flex-shrink: 0;
+    }
+    
+    .prod-badge {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: var(--g2);
+      color: var(--white);
+      font-size: 8px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 20px;
+      z-index: 1;
+    }
+    
+    .prod-body {
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .prod-name {
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 3px;
+      line-height: 1.3;
+    }
+    
+    .prod-origin {
+      font-size: 9px;
+      color: var(--g3);
+      margin-bottom: 4px;
+    }
+    
+    .prod-price {
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--orange);
+      margin-bottom: 6px;
+    }
+    
+    .prod-btn {
+      margin-top: auto;
+      width: 100%;
+      padding: 6px;
+      border: 1px solid var(--g4);
+      background: var(--g6);
+      color: var(--g2);
+      border-radius: var(--rx);
+      font-size: 9px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+      flex-shrink: 0;
+    }
+    
+    /* 피드 */
+    .feed {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+    
+    .feed-item {
+      background: var(--white);
+      border-radius: var(--rs);
+      border: 1px solid var(--lgray);
+      padding: 10px 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      box-shadow: var(--shadow);
+    }
+    
+    .feed-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+    
+    .feed-txt {
+      font-size: 11px;
+      flex: 1;
+      line-height: 1.5;
+    }
+    
+    .feed-time {
+      font-size: 9px;
+      color: var(--gray);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    
+    /* 타임라인 */
+    .tl {
+      margin-bottom: 18px;
+    }
+    
+    .tl-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .tl-spine {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 24px;
+      flex-shrink: 0;
+    }
+    
+    .tl-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 3px solid var(--g3);
+      background: var(--white);
+      flex-shrink: 0;
+    }
+    
+    .tl-dot.done {
+      background: var(--g3);
+    }
+    
+    .tl-dot.now {
+      background: var(--orange);
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(231,111,27,.2);
+    }
+    
+    .tl-line {
+      width: 2px;
+      background: var(--g5);
+      flex: 1;
+      margin: 3px 0;
+      min-height: 20px;
+    }
+    
+    .tl-box {
+      background: var(--white);
+      border-radius: var(--rs);
+      border: 1px solid var(--lgray);
+      padding: 10px 12px;
+      flex: 1;
+      box-shadow: var(--shadow);
+    }
+    
+    .tl-box.now {
+      border-color: var(--orange);
+    }
+    
+    .tl-ttl {
+      font-size: 12px;
+      font-weight: 700;
+    }
+    
+    .tl-date {
+      font-size: 9px;
+      color: var(--gray);
+      margin-top: 2px;
+    }
+    
+    .tl-detail {
+      font-size: 10px;
+      color: var(--gray);
+      margin-top: 4px;
+      line-height: 1.6;
+    }
+    
+    /* ===== MY페이지 ===== */
+    .my-header {
+      background: var(--g1);
+      border-radius: var(--r);
+      padding: 20px;
+      color: var(--white);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .my-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--g4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+    
+    .my-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .my-name {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    
+    .my-sub {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    
+    .my-points {
+      background: var(--white);
+      border-radius: var(--rs);
+      padding: 14px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+    }
+    
+    .my-point-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--lgray);
+    }
+    
+    .my-point-item:last-child {
+      border-bottom: none;
+    }
+    
+    .my-point-label {
+      font-size: 13px;
+      color: var(--dark);
+      font-weight: 600;
+    }
+    
+    .my-point-value {
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--orange);
+    }
+    
+    .my-menu {
+      background: var(--white);
+      border-radius: var(--rs);
+      border: 1px solid var(--lgray);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+    
+    .my-menu-item {
+      padding: 14px;
+      border-bottom: 1px solid var(--lgray);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .my-menu-item:last-child {
+      border-bottom: none;
+    }
+    
+    .my-menu-item:hover {
+      background: var(--off);
+    }
+    
+    .my-menu-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
+    .my-menu-arrow {
+      color: var(--gray);
+      font-size: 14px;
+    }
+    
+    /* 설정 폼 */
+    .settings-form {
+      background: var(--white);
+      border-radius: var(--rs);
+      border: 1px solid var(--lgray);
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+    
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 6px;
+      display: block;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--lgray);
+      border-radius: var(--rx);
+      font-family: var(--font);
+      font-size: 12px;
+      box-sizing: border-box;
+    }
+    
+    .form-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+    }
+    
+    .toggle-label {
+      font-size: 12px;
+      color: var(--dark);
+      font-weight: 500;
+    }
+    
+    .toggle-switch {
+      width: 44px;
+      height: 24px;
+      border-radius: 12px;
+      background: var(--lgray);
+      border: none;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s;
+    }
+    
+    .toggle-switch.on {
+      background: var(--g3);
+    }
+    
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--white);
+      top: 2px;
+      left: 2px;
+      transition: all 0.3s;
+    }
+    
+    .toggle-switch.on::after {
+      left: 22px;
+    }
+    
+    /* 태블릿 */
+    @media (min-width: 601px) {
+      .app-sidebar {
+        width: 100px;
+      }
+      
+      .sidebar-nav-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 26px;
+      }
+      
+      .sidebar-user {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+      }
+      
+      .sidebar-logo {
+        font-size: 32px;
+        padding: 16px 0;
+      }
+      
+      .kpi-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      .prod-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+      
+      .page {
+        padding: 16px;
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+        padding-top: max(16px, env(safe-area-inset-top));
+      }
+    }
+    
+    /* PC */
+    @media (min-width: 1025px) {
+      .app-sidebar {
+        width: 240px;
+        align-items: stretch;
+        padding-left: max(0px, env(safe-area-inset-left));
+      }
+      
+      .sidebar-logo {
+        font-size: 28px;
+        padding: 20px;
+        text-align: center;
+        border-bottom: 1px solid rgba(255,255,255,0.2);
+      }
+      
+      .sidebar-nav {
+        flex-direction: column;
+        gap: 4px;
+        align-items: stretch;
+        padding: 16px;
+        flex: 1;
+      }
+      
+      .sidebar-nav-btn {
+        width: 100%;
+        height: 44px;
+        justify-content: flex-start;
+        padding-left: 12px;
+        font-size: 18px;
+        text-align: left;
+        border-radius: var(--rs);
+      }
+      
+      .sidebar-user {
+        width: 100%;
+        height: 44px;
+        border-radius: var(--rs);
+        margin-top: 0;
+        margin-bottom: 16px;
+        margin-left: 0;
+        font-size: 18px;
+      }
+      
+      .app-header {
+        display: none;
+      }
+      
+      .kpi-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      
+      .prod-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      }
+      
+      .page {
+        padding: 24px;
+        padding-left: max(24px, env(safe-area-inset-left));
+        padding-right: max(24px, env(safe-area-inset-right));
+        padding-top: max(24px, env(safe-area-inset-top));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- 좌측 사이드바 -->
+    <div class="app-sidebar">
+      <div class="sidebar-logo">🥬</div>
+      <div class="sidebar-nav" id="sidebar-nav"></div>
+      <div class="sidebar-user" id="sidebar-user">👤</div>
+    </div>
+    
+    <!-- 메인 컨텐츠 -->
+    <div class="app-main">
+      <div class="app-header" id="app-header">
+        <div class="app-header-title" id="page-title">홈</div>
+        <div class="app-header-icons">
+          <button class="app-header-btn">🔍</button>
+          <button class="app-header-btn">🛒</button>
+        </div>
+      </div>
+      
+      <div class="pages-wrap">
+        <!-- HOME -->
+        <div class="page active" id="page-home">
+          <div class="sh"><div class="sh-t">추천 상품</div><div class="sh-a">더보기</div></div>
+          <div class="prod-grid" id="home-prods"></div>
+          
+          <div class="sh"><div class="sh-t">오늘의 소식</div><div class="sh-a">더보기</div></div>
+          <div class="feed" id="home-feed"></div>
+          
+          <div class="sh"><div class="sh-t">실시간 재고</div><div class="sh-a">모두 보기</div></div>
+          <div class="kpi-grid" id="iot-cards"></div>
+        </div>
+        
+        <!-- TRACE -->
+        <div class="page" id="page-trace">
+          <div class="sh"><div class="sh-t">상품 추적</div></div>
+          <div style="background: var(--g1); border-radius: var(--r); padding: 14px; color: var(--white); margin-bottom: 18px;">
+            <div style="font-size: 16px; font-weight: 700; margin-bottom: 4px;">🥬 신선한 산들 시금치</div>
+            <div style="font-size: 12px; opacity: 0.8;">전주, 전라북도 · SPINACH-JJ-2024</div>
+          </div>
+          
+          <div class="sh"><div class="sh-t">생산 이력</div></div>
+          <div class="tl" id="timeline"></div>
+        </div>
+        
+        <!-- STORE -->
+        <div class="page" id="page-store">
+          <div class="sh"><div class="sh-t">가까운 매장</div></div>
+          <div id="store-list"></div>
+        </div>
+        
+        <!-- CHAT -->
+        <div class="page" id="page-chat">
+          <div class="sh"><div class="sh-t">AI 채팅</div></div>
+          <div id="chat-msgs" style="flex: 1; overflow-y: auto; padding: 10px; background: var(--white); border-radius: var(--rs); margin-bottom: 14px;"></div>
+          <input type="text" id="chat-input" placeholder="메시지 입력..." style="width: 100%; padding: 10px; border: 1px solid var(--lgray); border-radius: var(--rx); font-family: var(--font); margin-bottom: 10px;">
+        </div>
+        
+        <!-- MY -->
+        <div class="page" id="page-my">
+          <div class="my-header">
+            <div class="my-avatar">김</div>
+            <div class="my-info">
+              <div class="my-name">김농협</div>
+              <div class="my-sub">지난 구매 $34,000</div>
+            </div>
+          </div>
+          
+          <div class="my-points">
+            <div class="my-point-item">
+              <span class="my-point-label">포인트</span>
+              <span class="my-point-value">12,400P</span>
+            </div>
+            <div class="my-point-item">
+              <span class="my-point-label">이달 구매액</span>
+              <span class="my-point-value">84,500원</span>
+            </div>
+            <div class="my-point-item">
+              <span class="my-point-label">구매 횟수</span>
+              <span class="my-point-value">23회</span>
+            </div>
+          </div>
+          
+          <div class="my-menu">
+            <div class="my-menu-item" onclick="showSettings()">
+              <span class="my-menu-label">주문 이력</span>
+              <span class="my-menu-arrow">›</span>
+            </div>
+            <div class="my-menu-item">
+              <span class="my-menu-label">찜한 상품</span>
+              <span class="my-menu-arrow">›</span>
+            </div>
+            <div class="my-menu-item">
+              <span class="my-menu-label">리뷰</span>
+              <span class="my-menu-arrow">›</span>
+            </div>
+            <div class="my-menu-item">
+              <span class="my-menu-label">배송 조회</span>
+              <span class="my-menu-arrow">›</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- SETTINGS -->
+        <div class="page" id="page-settings">
+          <div class="sh"><div class="sh-t">회원정보</div></div>
+          <div class="settings-form">
+            <div class="form-group">
+              <label class="form-label">이메일</label>
+              <input type="email" class="form-input" value="kim@hanaro.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label">전화번호</label>
+              <input type="tel" class="form-input" value="010-1234-5678">
+            </div>
+            <div class="form-group">
+              <label class="form-label">배송 주소</label>
+              <input type="text" class="form-input" value="서울 강서구 가양동">
+            </div>
+          </div>
+          
+          <div class="sh"><div class="sh-t">알림 설정</div></div>
+          <div class="settings-form">
+            <div class="form-toggle">
+              <span class="toggle-label">푸시 알림</span>
+              <button class="toggle-switch on" onclick="toggleSwitch(this)"></button>
+            </div>
+            <div class="form-toggle">
+              <span class="toggle-label">이메일 알림</span>
+              <button class="toggle-switch on" onclick="toggleSwitch(this)"></button>
+            </div>
+            <div class="form-toggle">
+              <span class="toggle-label">할인 정보</span>
+              <button class="toggle-switch on" onclick="toggleSwitch(this)"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+    
+    var PAGES = [
+      {id: 'page-home', label: '홈', ico: '🏠'},
+      {id: 'page-trace', label: '추적', ico: '🔍'},
+      {id: 'page-store', label: '매장', ico: '📍'},
+      {id: 'page-chat', label: '채팅', ico: '💬'},
+      {id: 'page-my', label: 'MY', ico: '👤'},
+      {id: 'page-settings', label: '설정', ico: '⚙️'},
+    ];
+    
+    var PRODUCTS = [
+      {name: '싱싱한 무순', origin: '제주산', price: '3,500', emoji: '🥬'},
+      {name: '유기농 당근', origin: '전주산', price: '2,800', emoji: '🥕'},
+      {name: '방울토마토', origin: '고흥산', price: '4,200', emoji: '🍅'},
+      {name: '파프리카 3종', origin: '세종산', price: '5,900', emoji: '🫑'},
+      {name: '상큼한 딸기', origin: '김제산', price: '6,500', emoji: '🍓'},
+      {name: '깐양파', origin: '남원산', price: '2,100', emoji: '🧅'},
+    ];
+    
+    var KPIS = [
+      {label: '온도', value: '4°C', emoji: '🌡️'},
+      {label: '습도', value: '92%', emoji: '💧'},
+      {label: '유통기한', value: '2일', emoji: '⏱️'},
+      {label: '신선도', value: 'A등급', emoji: '✅'},
+    ];
+    
+    var FEED_ITEMS = [
+      {dot: '--g3', txt: '🎁 10,000원 이상 구매 시 5,000P 적립'},
+      {dot: '--orange', txt: '🌟 신상품 추가! 유기농 새송이버섯'},
+      {dot: '--g4', txt: '📢 매장 방문 시 구매액의 5% 할인'},
+    ];
+    
+    var TIMELINE = [
+      {done: true, now: false, title: '수확 완료', date: '2024.05.12', detail: '전주 농장에서 오전 8시 수확'},
+      {done: true, now: false, title: '품질 검사', date: '2024.05.12 10:30', detail: '유기농 기준 충족, 농약 검사 음성'},
+      {done: true, now: true, title: '배송 중', date: '2024.05.13 15:00', detail: '물류센터에서 출발'},
+      {done: false, now: false, title: '도착 예정', date: '2024.05.14', detail: '예상 도착 시간: 09:00'},
+    ];
+    
+    function $(id){
+      return document.getElementById(id);
+    }
+    
+    function showPage(pageId){
+      var pages = document.querySelectorAll('.page');
+      var btns = document.querySelectorAll('.sidebar-nav-btn');
+      pages.forEach(p => p.classList.remove('active'));
+      btns.forEach(b => b.classList.remove('active'));
+      $(pageId).classList.add('active');
+      
+      var btn = document.querySelector('[data-page="' + pageId + '"]');
+      if(btn) btn.classList.add('active');
+      
+      var title = PAGES.find(p => p.id === pageId);
+      var header = $('app-header');
+      if(header && title) {
+        $('page-title').textContent = title.label;
+      }
+    }
+    
+    function buildSidebar(){
+      var nav = $('sidebar-nav');
+      nav.innerHTML = '';
+      PAGES.forEach((page, idx) => {
+        if(page.id === 'page-settings') return;
+        var btn = document.createElement('button');
+        btn.className = 'sidebar-nav-btn' + (idx === 0 ? ' active' : '');
+        btn.textContent = page.ico;
+        btn.setAttribute('data-page', page.id);
+        btn.onclick = () => showPage(page.id);
+        nav.appendChild(btn);
+      });
+    }
+    
+    function buildProducts(){
+      var wrap = $('home-prods');
+      wrap.innerHTML = '';
+      PRODUCTS.forEach(p => {
+        var card = document.createElement('div');
+        card.className = 'prod-card';
+        card.innerHTML = '<div class="prod-img"><div class="prod-badge">신상</div>' + p.emoji + '</div>' +
+          '<div class="prod-body">' +
+          '<div class="prod-name">' + p.name + '</div>' +
+          '<div class="prod-origin">' + p.origin + '</div>' +
+          '<div class="prod-price">' + p.price + '</div>' +
+          '<button class="prod-btn">담기</button>' +
+          '</div>';
+        wrap.appendChild(card);
+      });
+    }
+    
+    function buildFeed(){
+      var wrap = $('home-feed');
+      wrap.innerHTML = '';
+      FEED_ITEMS.forEach(item => {
+        var el = document.createElement('div');
+        el.className = 'feed-item';
+        el.innerHTML = '<div class="feed-dot" style="background: var(' + item.dot + ')"></div>' +
+          '<div class="feed-txt">' + item.txt + '</div>';
+        wrap.appendChild(el);
+      });
+    }
+    
+    function buildIOT(){
+      var wrap = $('iot-cards');
+      wrap.innerHTML = '';
+      KPIS.forEach(kpi => {
+        var card = document.createElement('div');
+        card.className = 'kpi';
+        card.innerHTML = '<div style="font-size: 20px; margin-bottom: 6px;">' + kpi.emoji + '</div>' +
+          '<div class="kpi-val">' + kpi.value + '</div>' +
+          '<div class="kpi-lbl">' + kpi.label + '</div>';
+        wrap.appendChild(card);
+      });
+    }
+    
+    function buildTimeline(){
+      var wrap = $('timeline');
+      wrap.innerHTML = '';
+      TIMELINE.forEach((item, idx) => {
+        var row = document.createElement('div');
+        row.className = 'tl-row';
+        var spine = '<div class="tl-spine"><div class="tl-dot' + (item.done ? ' done' : '') + (item.now ? ' now' : '') + '"></div>';
+        if(idx < TIMELINE.length - 1) spine += '<div class="tl-line"></div>';
+        spine += '</div>';
+        var box = '<div class="tl-box' + (item.now ? ' now' : '') + '">' +
+          '<div class="tl-ttl">' + item.title + '</div>' +
+          '<div class="tl-date">' + item.date + '</div>' +
+          '<div class="tl-detail">' + item.detail + '</div></div>';
+        row.innerHTML = spine + box;
+        wrap.appendChild(row);
+      });
+    }
+    
+    function buildStores(){
+      var wrap = $('store-list');
+      wrap.innerHTML = '';
+      var stores = [
+        {name: '하나로마트 가양점', addr: '서울 강서구 가양동', dist: '0.8km'},
+        {name: '하나로마트 마포점', addr: '서울 마포구 상암동', dist: '1.2km'},
+        {name: '하나로마트 강남점', addr: '서울 강남구 삼성동', dist: '3.5km'},
+      ];
+      stores.forEach((store, idx) => {
+        var card = document.createElement('div');
+        card.className = 'feed-item';
+        card.innerHTML = '<div class="feed-dot" style="background: var(--g3); width: 10px; height: 10px;"></div>' +
+          '<div style="flex: 1;"><div style="font-size: 12px; font-weight: 600;">' + store.name + (idx === 0 ? ' 🏆' : '') + '</div>' +
+          '<div style="font-size: 10px; color: var(--gray); margin-top: 2px;">' + store.dist + ' · ' + store.addr + '</div></div>';
+        wrap.appendChild(card);
+      });
+    }
+    
+    function showSettings(){
+      showPage('page-settings');
+    }
+    
+    function toggleSwitch(btn){
+      btn.classList.toggle('on');
+    }
+    
+    function init(){
+      buildSidebar();
+      buildProducts();
+      buildFeed();
+      buildIOT();
+      buildTimeline();
+      buildStores();
+    }
+    
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, minimum-scale=1, maximum-scale=5, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
